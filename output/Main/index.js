@@ -8,6 +8,7 @@ var Control_Monad_Eff_Random = require("../Control.Monad.Eff.Random");
 var DOM = require("../DOM");
 var Data_Array = require("../Data.Array");
 var Data_Eq = require("../Data.Eq");
+var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
 var Data_HeytingAlgebra = require("../Data.HeytingAlgebra");
@@ -38,7 +39,7 @@ var PrestoDOM_Types = require("../PrestoDOM.Types");
 var PrestoDOM_Types_DomAttributes = require("../PrestoDOM.Types.DomAttributes");
 var PrestoDOM_Util = require("../PrestoDOM.Util");
 var view = function (state) {
-    return PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(200)), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.name("rootNode"), PrestoDOM_Properties.orientation("Horizontal") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(975)), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical"), PrestoDOM_Properties.gravity("center") ])([ PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(975)), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical") ])([ PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.name("Play Screen"), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical") ])(Data_Functor.map(Data_Functor.functorArray)(Game_DrawTools.charDraw(state))(state.props)), PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.orientation("vertical") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(10)), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(10)), PrestoDOM_Properties.margin("100," + (Data_Show.show(Data_Show.showNumber)(200.0 - 80.0 * $$Math.sin(state.player.y)) + ",0,0")), PrestoDOM_Properties.background("#888888") ])([  ]) ]) ]) ]), PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.background("#000000"), PrestoDOM_Properties.orientation("vertical"), PrestoDOM_Properties.gravity("centerHorizontal") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.background("#ff0000"), PrestoDOM_Properties.gravity("center") ])([ PrestoDOM_Elements.textView([ PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.text("Hit Me Up!"), PrestoDOM_Properties.gravity("center"), PrestoDOM_Properties.textSize("28") ]) ]), PrestoDOM_Elements.textView([ PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(100)), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.color("#000000"), PrestoDOM_Properties.text("Score:" + Data_Show.show(Data_Show.showInt)(state.score)), PrestoDOM_Properties.textSize("28") ]) ]) ]);
+    return PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(200)), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.name("rootNode"), PrestoDOM_Properties.orientation("Horizontal") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(975)), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical"), PrestoDOM_Properties.gravity("center") ])([ PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(975)), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical") ])([ PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.name("Play Screen"), PrestoDOM_Properties.background("#ffffff"), PrestoDOM_Properties.orientation("vertical") ])(Data_Functor.map(Data_Functor.functorArray)(Game_DrawTools.charDraw(state))(state.props)), PrestoDOM_Elements.relativeLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.orientation("vertical") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(10)), PrestoDOM_Properties.width(new PrestoDOM_Types_DomAttributes.V(10)), PrestoDOM_Properties.margin("100," + (Data_Show.show(Data_Show.showNumber)(200.0 - 150.0 * $$Math.sin(state.player.y)) + ",0,0")), PrestoDOM_Properties.background("#888888") ])([  ]) ]) ]) ]), PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.height(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.background("#000000"), PrestoDOM_Properties.orientation("vertical"), PrestoDOM_Properties.gravity("centerHorizontal") ])([ PrestoDOM_Elements.linearLayout([ PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.background("#ff0000"), PrestoDOM_Properties.gravity("center") ])([ PrestoDOM_Elements.textView([ PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.text("Hit Me Up!"), PrestoDOM_Properties.gravity("center"), PrestoDOM_Properties.textSize("28") ]) ]), PrestoDOM_Elements.textView([ PrestoDOM_Properties.width(PrestoDOM_Types_DomAttributes.Match_Parent.value), PrestoDOM_Properties.height(new PrestoDOM_Types_DomAttributes.V(40)), PrestoDOM_Properties.color("#000000"), PrestoDOM_Properties.text("Score:" + Data_Show.show(Data_Show.showInt)(state.score)), PrestoDOM_Properties.textSize("28") ]) ]) ]);
 };
 
 //update scores
@@ -52,13 +53,26 @@ var updateScore = function (keys) {
 var getCharItem = function (a) {
     return function __do() {
         var n = Control_Monad_Eff_Random.randomInt(0)(3)();
-        var m = Control_Monad_Eff_Random.randomInt(0)(2)();
+        var m = Control_Monad_Eff_Random.randomInt(0)(3)();
         return {
             x: a * 500 | 0,
             y: 200 - (m * 50 | 0) | 0,
+            key: a,
             id: "Prop"
         };
     };
+};
+var collisionOne = function (player) {
+    return function (prop) {
+        var $4 = $$Math.abs(200.0 - 150.0 * $$Math.sin(player.y) - Data_Int.toNumber(prop.y)) < 20.0 && $$Math.abs(100.0 - Data_Int.toNumber(prop.x)) < 20.0;
+        if ($4) {
+            return true;
+        };
+        return false;
+    };
+};
+var collisionAll = function (state) {
+    return Data_Array.filter(collisionOne(state.player))(state.props);
 };
 var main = (function () {
     var validate = function (key) {
@@ -66,16 +80,26 @@ var main = (function () {
             if (key === true && oldState.player.y > 3.14) {
                 return {
                     props: Data_Functor.map(Data_Functor.functorArray)(function (n) {
+                        var $7 = n.x < 0;
+                        if ($7) {
+                            return {
+                                x: 500 * Game_Values.charCount | 0,
+                                y: 200 - (50 * ((n.y + n.key | 0) % 3) | 0) | 0,
+                                id: n.id,
+                                key: n.key
+                            };
+                        };
                         return {
                             x: n.x - 4 | 0,
                             y: n.y,
-                            id: n.id
+                            id: n.id,
+                            key: n.key
                         };
                     })(oldState.props),
                     player: {
                         y: 0.0
                     },
-                    score: 0,
+                    score: oldState.score + 1 | 0,
                     scorePos: {
                         x: "30",
                         y: "30"
@@ -84,18 +108,62 @@ var main = (function () {
                     gameOver: false
                 };
             };
+            if (oldState.gameOver === true) {
+                return oldState;
+            };
+            if (Data_Array["null"](collisionAll(oldState)) === false) {
+                return {
+                    props: Data_Functor.map(Data_Functor.functorArray)(function (n) {
+                        var $8 = n.x < 0;
+                        if ($8) {
+                            return {
+                                x: 500 * Game_Values.charCount | 0,
+                                y: 200 - (50 * ((n.y + n.key | 0) % 3) | 0) | 0,
+                                id: n.id,
+                                key: n.key
+                            };
+                        };
+                        return {
+                            x: n.x - 4 | 0,
+                            y: n.y,
+                            id: n.id,
+                            key: n.key
+                        };
+                    })(oldState.props),
+                    player: {
+                        y: Data_Ord.clamp(Data_Ord.ordNumber)(0.0)(3.141)(oldState.player.y) + 9.0e-2
+                    },
+                    score: oldState.score + 1 | 0,
+                    scorePos: {
+                        x: "30",
+                        y: "30"
+                    },
+                    gameStart: false,
+                    gameOver: true
+                };
+            };
             return {
                 props: Data_Functor.map(Data_Functor.functorArray)(function (n) {
+                    var $9 = n.x < 0;
+                    if ($9) {
+                        return {
+                            x: 500 * Game_Values.charCount | 0,
+                            y: 200 - (50 * ((n.y + n.key | 0) % 3) | 0) | 0,
+                            id: n.id,
+                            key: n.key
+                        };
+                    };
                     return {
                         x: n.x - 4 | 0,
                         y: n.y,
-                        id: n.id
+                        id: n.id,
+                        key: n.key
                     };
                 })(oldState.props),
                 player: {
                     y: Data_Ord.clamp(Data_Ord.ordNumber)(0.0)(3.141)(oldState.player.y) + 9.0e-2
                 },
-                score: 0,
+                score: oldState.score + 1 | 0,
                 scorePos: {
                     x: "30",
                     y: "30"
@@ -129,6 +197,8 @@ var main = (function () {
 module.exports = {
     updateScore: updateScore,
     getCharItem: getCharItem,
+    collisionOne: collisionOne,
+    collisionAll: collisionAll,
     main: main,
     view: view
 };

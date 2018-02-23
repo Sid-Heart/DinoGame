@@ -3,6 +3,7 @@ module Game.Types where
 type CharItem = {
   x     :: Int
 , y     :: Int
+, key   :: Int
 , id    :: String
 }
 

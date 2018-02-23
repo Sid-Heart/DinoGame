@@ -1,7 +1,7 @@
 module Game.Values where
 
 charCount::Int
-charCount=3
+charCount=2
 
 charSpeed::Int
 charSpeed=2
