@@ -9,6 +9,7 @@ type CharItem = {
 
 type Player = {
   y :: Number
+  ,aid :: Number
 }
 
 type StateType = {

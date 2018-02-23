@@ -6,11 +6,13 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Random (RANDOM, randomInt)
 import DOM (DOM)
-import Data.Array ((..),filter,null)
+import Data.Array ((..), filter, null)
 import Data.Int (toNumber)
+import Data.Maybe (fromMaybe)
 import Data.Number.Format (toString)
 import Data.Ord (clamp)
 import Data.Set (Set)
+import Data.String.Utils (charAt)
 import Data.Traversable (traverse)
 import FRP (FRP)
 import FRP.Behavior (Behavior)
@@ -19,10 +21,10 @@ import FRP.Event.Time (animationFrame)
 import Game.DrawTools (charDraw)
 import Game.Types (CharItem, StateType, Player)
 import Game.Values (charCount)
-import Math (sin,abs)
+import Math (sin, abs)
 import PrestoDOM.Core (PrestoDOM)
-import PrestoDOM.Elements (linearLayout, textView, relativeLayout)
-import PrestoDOM.Properties (background, color, gravity, margin, height, name, orientation, text, textSize, width)
+import PrestoDOM.Elements (linearLayout, textView, relativeLayout, imageView)
+import PrestoDOM.Properties (background,id_, color, gravity, margin, height, name, orientation, text, textSize, width, imageUrl)
 import PrestoDOM.Types (Length(..))
 import PrestoDOM.Util (render)
 
@@ -40,7 +42,7 @@ getCharItem a =
       pure{x:a*500,y:200 - (m*50),key :a,id:"Prop"}
 
 collisionOne::Player -> CharItem -> Boolean
-collisionOne player prop = if abs((200.0 - 150.0*sin(player.y))-toNumber(prop.y))<20.0 && abs(100.0 - toNumber(prop.x))<20.0
+collisionOne player prop = if abs((150.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
                               then true 
                               else false
 
@@ -51,25 +53,33 @@ main :: forall eff. Eff ( random::RANDOM, console :: CONSOLE, frp :: FRP, dom ::
 main = do
     _ <- log "Running"
     setOfChars <- (traverse getCharItem (1 .. charCount))
-    let initialState = {props:setOfChars,player:{y:0.0}, score:0, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
+    let initialState = {props:setOfChars,player:{y:0.0,aid:0.0}, score:0, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
     { stateBeh, updateState } <- render view initialState
     _<- updateState
       (validate <$> (key 32) <*> stateBeh)
       (animationFrame)
     pure unit
-  where validate key oldState | key == true && oldState.player.y>3.14 = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-4,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:0.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
-        validate key oldState | oldState.gameOver==true = oldState
-        validate key oldState | null (collisionAll oldState) == false = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-4,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:true}
-        validate key oldState  = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-4,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
+  where validate key oldState | oldState.gameOver==true = oldState
+        validate key oldState | key == true && oldState.player.y>3.14 = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:0.0,aid:0.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
+        validate key oldState | null (collisionAll oldState) == false = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09 , aid:3.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:true}
+        validate key oldState  = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key } else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09,aid: if oldState.player.aid>2.9 then oldState.player.aid-2.8 else oldState.player.aid+0.1}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
 
 view :: forall w i. StateType -> PrestoDOM i w
 view state =
   --main layout
   linearLayout
+  [ height $ V 200
+  , width Match_Parent
+  , background "#ffffff"
+  , name "rootNode"
+  , orientation "vertical"
+  ]
+  [
+    linearLayout
     [ height $ V 200
     , width Match_Parent
     , background "#ffffff"
-    , name "rootNode"
+    , name "rootNodeNExt"
     , orientation "Horizontal"
     ]
     [
@@ -84,7 +94,7 @@ view state =
         --game container
         relativeLayout
         [ height Match_Parent
-        , width $ V 975
+        , width Match_Parent
         , background "#ffffff"
         , orientation "vertical"
         ]
@@ -106,13 +116,36 @@ view state =
           [
             linearLayout
             [
-              height $ V 10
-            , width $ V 10
-            , margin $ "100,"<>show (200.0 - 150.0*sin(state.player.y))<>",0,0"
-            , background "#888888"
+              height $ V 50
+            , width $ V 50
+            , margin $ "100,"<>show (150.0 - 150.0*sin(state.player.y))<>",0,0"
             ]
-            []
-          ]
+            [
+              imageView
+              [ 
+              height Match_Parent
+              , width Match_Parent
+              , margin "0,0,0,0"
+              , imageUrl $ "assets/TRex"<>fromMaybe "" (charAt 0 $ show state.player.aid)
+              ]
+            ]
+          ]--,relativeLayout
+          -- [ height Match_Parent
+          -- , width Match_Parent
+          -- , orientation "vertical"
+          -- ]
+          -- [
+          --   linearLayout
+          --   [
+          --     height $ V 50
+          --     wid
+          --   , name "Ground"
+          --   , width $ V 50
+          --   , background "#888888"
+          --   , margin $ "100,260,0,0"
+          --   ]
+          --   []
+          -- ]
         ]
       ],
       --score board
@@ -123,19 +156,19 @@ view state =
       , orientation "vertical"
       , gravity "centerHorizontal"
       ]
-      [ 
+      [
          --title
         linearLayout
         [ width Match_Parent
-        , height $ V 40
+        , height Match_Parent
         , background "#ff0000"
         , gravity "center"
         ]
         [
           textView
           [ width Match_Parent
-          , height $ V 40
-          , text "Hit Me Up!"
+          , height Match_Parent
+          , text "Chrome Offline Game!"
           , gravity "center"
           , textSize "28"
           ]
@@ -148,4 +181,14 @@ view state =
         , textSize "28"
         ]
       ]
+    ],
+    linearLayout
+    [
+      height $ V 50
+      , id_ "ground"
+      , width Match_Parent
+      , background "#888888"
+      , margin "0,10,0,0"
     ]
+    []
+  ]
