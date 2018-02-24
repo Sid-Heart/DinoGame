@@ -13,4 +13,4 @@
 T-Rex Game of chrome.
 
 # Play Link :
-https://www.sid-heart.github.io/DinoGame/
+https://sid-heart.github.io/DinoGame/
