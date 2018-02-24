@@ -1,10 +1,11 @@
 module Game.Types where
 
-type CharItem = {
+type Prop = {
   x     :: Int
 , y     :: Int
 , key   :: Int
 , id    :: String
+, aid   :: Number
 }
 
 type Player = {
@@ -13,7 +14,8 @@ type Player = {
 }
 
 type StateType = {
-   props   :: Array CharItem
+   props   :: Array Prop
+,  groundSpeed ::Int
 ,  player  :: Player
 ,  score     :: Int
 ,  scorePos  :: {x :: String, y :: String}

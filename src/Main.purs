@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Random (RANDOM, randomInt)
+import Control.Monad.Eff.Random (RANDOM, randomInt, randomRange)
 import DOM (DOM)
 import Data.Array ((..), filter, null)
 import Data.Int (toNumber)
@@ -19,12 +19,12 @@ import FRP.Behavior (Behavior)
 import FRP.Behavior.Keyboard (key, keys)
 import FRP.Event.Time (animationFrame)
 import Game.DrawTools (charDraw)
-import Game.Types (CharItem, StateType, Player)
-import Game.Values (charCount)
+import Game.Types (Prop, StateType, Player)
+import Game.Values (charCount,groundPos)
 import Math (sin, abs)
 import PrestoDOM.Core (PrestoDOM)
 import PrestoDOM.Elements (linearLayout, textView, relativeLayout, imageView)
-import PrestoDOM.Properties (background,id_, color, gravity, margin, height, name, orientation, text, textSize, width, imageUrl)
+import PrestoDOM.Properties (background, id_, color, gravity, margin, height, name, orientation, text, textSize, width, imageUrl)
 import PrestoDOM.Types (Length(..))
 import PrestoDOM.Util (render)
 
@@ -35,34 +35,34 @@ updateScore keys score=
   score
 
 --produce baloon
-getCharItem ::forall a. Int -> Eff(random :: RANDOM | a) CharItem
+getCharItem ::forall a. Int -> Eff(random :: RANDOM | a) Prop
 getCharItem a =
-  randomInt 0 3 >>= \n ->
+  randomRange 0.0 3.0 >>= \n ->
     randomInt 0 3 >>= \m ->
-      pure{x:a*500,y:200 - (m*50),key :a,id:"Prop"}
+      pure{x:a*500,y:groundPos - (m*50),key :a,id:"Prop",aid:n}
 
-collisionOne::Player -> CharItem -> Boolean
-collisionOne player prop = if abs((150.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
+collisionOne::Player -> Prop -> Boolean
+collisionOne player prop = if abs((200.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
                               then true 
                               else false
 
-collisionAll::StateType -> Array CharItem
+collisionAll::StateType -> Array Prop
 collisionAll state =  filter (collisionOne state.player) state.props
 
 main :: forall eff. Eff ( random::RANDOM, console :: CONSOLE, frp :: FRP, dom :: DOM | eff ) Unit
 main = do
     _ <- log "Running"
     setOfChars <- (traverse getCharItem (1 .. charCount))
-    let initialState = {props:setOfChars,player:{y:0.0,aid:0.0}, score:0, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
+    let initialState = {props:setOfChars,player:{y:0.0,aid:0.0}, score:0, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false, groundSpeed:0}
     { stateBeh, updateState } <- render view initialState
     _<- updateState
       (validate <$> (key 32) <*> stateBeh)
       (animationFrame)
     pure unit
   where validate key oldState | oldState.gameOver==true = oldState
-        validate key oldState | key == true && oldState.player.y>3.14 = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:0.0,aid:0.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
-        validate key oldState | null (collisionAll oldState) == false = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09 , aid:3.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:true}
-        validate key oldState  = { props: (map (\n->if n.x<0 then {x:500*charCount,y:200-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key } else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09,aid: if oldState.player.aid>2.9 then oldState.player.aid-2.8 else oldState.player.aid+0.1}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false}
+        validate key oldState | key == true && oldState.player.y>3.14 = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:0.0,aid:0.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
+        validate key oldState | null (collisionAll oldState) == false = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09 , aid:3.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:true,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
+        validate key oldState  = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09,aid: if oldState.player.aid>2.9 then oldState.player.aid-2.8 else oldState.player.aid+0.1}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
 
 view :: forall w i. StateType -> PrestoDOM i w
 view state =
@@ -118,11 +118,11 @@ view state =
             [
               height $ V 50
             , width $ V 50
-            , margin $ "100,"<>show (150.0 - 150.0*sin(state.player.y))<>",0,0"
+            , margin $ "100,"<>show (200.0 - 150.0*sin(state.player.y))<>",0,0"
             ]
             [
               imageView
-              [ 
+              [
               height Match_Parent
               , width Match_Parent
               , margin "0,0,0,0"
@@ -182,13 +182,31 @@ view state =
         ]
       ]
     ],
+    relativeLayout
+    [
+      height $ V 30
+      , width $ V 975
+      , margin "0,40"
+    ]
+    [
     linearLayout
     [
-      height $ V 50
-      , id_ "ground"
-      , width Match_Parent
-      , background "#888888"
-      , margin "0,10,0,0"
+      height $ V 30
+      , id_ "ground0"
+      , width $ V 975
+      , margin $ show (mod state.groundSpeed 975)<>",5,0,0"
     ]
-    []
+    [
+      
+    ],
+    linearLayout
+    [
+      height $ V 30
+      , id_ "ground1"
+      , width $ V 975 
+      , margin $ show ((mod (state.groundSpeed) 975)+975)<>",5,0,0"
+    ]
+    [
+    ]
+    ]
   ]
