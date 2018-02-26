@@ -8,7 +8,6 @@ var Data_Number_Format = require("../Data.Number.Format");
 var Data_Semigroup = require("../Data.Semigroup");
 var Data_Show = require("../Data.Show");
 var Data_String_Utils = require("../Data.String.Utils");
-var Game_Utils = require("../Game.Utils");
 var Prelude = require("../Prelude");
 var PrestoDOM_Core = require("../PrestoDOM.Core");
 var PrestoDOM_Elements = require("../PrestoDOM.Elements");

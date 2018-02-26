@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Random (RANDOM, randomInt, randomRange)
@@ -9,18 +8,14 @@ import DOM (DOM)
 import Data.Array ((..), filter, null)
 import Data.Int (toNumber)
 import Data.Maybe (fromMaybe)
-import Data.Number.Format (toString)
-import Data.Ord (clamp)
-import Data.Set (Set)
 import Data.String.Utils (charAt)
 import Data.Traversable (traverse)
 import FRP (FRP)
-import FRP.Behavior (Behavior)
-import FRP.Behavior.Keyboard (key, keys)
+import FRP.Behavior.Keyboard (key)
 import FRP.Event.Time (animationFrame)
 import Game.DrawTools (charDraw)
 import Game.Types (Prop, StateType, Player)
-import Game.Values (charCount, groundPos)
+import Game.Values (charCount, groundPos,obstacleDist)
 import Math (sin, abs)
 import PrestoDOM.Core (PrestoDOM)
 import PrestoDOM.Elements (linearLayout, textView, relativeLayout, imageView)
@@ -39,11 +34,11 @@ getCharItem ::forall a. Int -> Eff(random :: RANDOM | a) Prop
 getCharItem a =
   randomRange 0.0 3.0 >>= \n ->
     randomInt 0 3 >>= \m ->
-      pure{x:a*500,y:groundPos - (m*50),key :a,id:"Prop",aid:n}
+      pure{x:a*obstacleDist,y:groundPos - (m*50),key :a,id:"Prop",aid:n}
 
 collisionOne::Player -> Prop -> Boolean
 collisionOne player prop = if abs((200.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
-                              then true 
+                              then true
                               else false
 
 collisionAll::StateType -> Array Prop
@@ -198,13 +193,12 @@ view state =
       , margin $ show (mod state.groundSpeed 975)<>",5,0,0"
     ]
     [
-      
     ],
     linearLayout
     [
       height $ V 30
       , id_ "ground1"
-      , width $ V 975 
+      , width $ V 975
       , margin $ show ((mod (state.groundSpeed) 975)+975)<>",5,0,0"
     ]
     [

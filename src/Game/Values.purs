@@ -1,7 +1,10 @@
 module Game.Values where
 
 charCount::Int
-charCount=2
+charCount=3
+
+obstacleDist::Int
+obstacleDist=500
 
 groundPos::Int
 groundPos=200
