@@ -118,23 +118,7 @@ view state =
               , imageUrl $ "assets/TRex"<>fromMaybe "" (charAt 0 $ show state.player.aid)
               ]
             ]
-          ]--,relativeLayout
-          -- [ height Match_Parent
-          -- , width Match_Parent
-          -- , orientation "vertical"
-          -- ]
-          -- [
-          --   linearLayout
-          --   [
-          --     height $ V 50
-          --     wid
-          --   , name "Ground"
-          --   , width $ V 50
-          --   , background "#888888"
-          --   , margin $ "100,260,0,0"
-          --   ]
-          --   []
-          -- ]
+          ]
         ]
       ],
       --score board
