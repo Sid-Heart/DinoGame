@@ -57,135 +57,63 @@ view :: forall w i. StateType -> PrestoDOM i w
 view state =
   --main layout
   linearLayout
-  [ height $ V 200
-  , width Match_Parent
-  , background "#ffffff"
-  , name "rootNode"
-  , orientation "vertical"
-  ]
+  [ height $ V 200 , width Match_Parent , background "#ffffff" , name "rootNode" , orientation "vertical"]
   [
     linearLayout
-    [ height $ V 200
-    , width Match_Parent
-    , background "#ffffff"
-    , name "rootNodeNExt"
-    , orientation "Horizontal"
-    ]
+    [ height $ V 200 , width Match_Parent , background "#ffffff" , name "rootNodeNExt" , orientation "Horizontal"]
     [
       linearLayout
-      [ height Match_Parent
-      , width $ V 975
-      , background "#ffffff"
-      , orientation "vertical"
-      , gravity "center"
-      ]
+      [ height Match_Parent , width $ V 975 , background "#ffffff" , orientation "vertical" , gravity "center" ]
       [
         --game container
         relativeLayout
-        [ height Match_Parent
-        , width Match_Parent
-        , background "#ffffff"
-        , orientation "vertical"
-        ]
+        [ height Match_Parent, width Match_Parent, background "#ffffff", orientation "vertical"]
         [
           --player
           relativeLayout
-          [ height Match_Parent
-          , width Match_Parent
-          , name "Play Screen"
-          , background "#ffffff"
-          , orientation "vertical"
-          ]
+          [ height Match_Parent, width Match_Parent , name "Play Screen" , background "#ffffff" , orientation "vertical" ]
           (charDraw state <$> state.props),
           relativeLayout
-          [ height Match_Parent
-          , width Match_Parent
-          , orientation "vertical"
-          ]
+          [ height Match_Parent, width Match_Parent, orientation "vertical"]
           [
             linearLayout
             [
-              height $ V 50
-            , width $ V 50
-            , margin $ "100,"<>show (200.0 - 150.0*sin(state.player.y))<>",0,0"
-            ]
+              height $ V 50, width $ V 50, margin $ "100,"<>show (200.0 - 150.0*sin(state.player.y))<>",0,0" ]
             [
               imageView
-              [
-              height Match_Parent
-              , width Match_Parent
-              , margin "0,0,0,0"
-              , imageUrl $ "assets/TRex"<>fromMaybe "" (charAt 0 $ show state.player.aid)
-              ]
+              [height Match_Parent, width Match_Parent, margin "0,0,0,0" , imageUrl $ "assets/TRex"<>fromMaybe "" (charAt 0 $ show state.player.aid)]
             ]
           ]
         ]
       ],
       --score board
       linearLayout
-      [ height $ V 300
-      , width Match_Parent
-      , background "#000000"
-      , orientation "vertical"
-      , gravity "centerHorizontal"
-      ]
+      [ height $ V 300, width Match_Parent, background "#000000", orientation "vertical", gravity "centerHorizontal"]
       [
          --title
         linearLayout
-        [ width Match_Parent
-        , height $ V 40
-        , background "#ff0000"
-        , gravity "center"
-        ]
+        [ width Match_Parent, height $ V 40, background "#ff0000", gravity "center"]
         [
           textView
-          [ width Match_Parent
-          , height $ V 40
-          , text "Chrome T-Rex Game!"
-          , gravity "center"
-          , textSize "28"
-          ]
+          [ width Match_Parent, height $ V 40, text "Chrome T-Rex Game!", gravity "center", textSize "28"]
         ],
         textView
-        [ width Match_Parent
-        , height $ V 40
-        , color "#000000"
-        , text $ "Score:"<>show state.score
-        , textSize "28"
-        ]
+        [ width Match_Parent, height $ V 40, color "#000000", text $ "Score:"<>show state.score, textSize "28"]
       ]
     ],
     relativeLayout
     [
-      height $ V 30
-      , width $ V 975
-      , margin "0,40"
-    ]
+      height $ V 30, width $ V 975, margin "0,40"]
     [
     linearLayout
     [
-      height $ V 30
-      , id_ "ground0"
-      , width $ V 975
-      , margin $ show (mod state.groundSpeed 975)<>",5,0,0"
-    ]
+      height $ V 30, id_ "ground0", width $ V 975, margin $ show (mod state.groundSpeed 975)<>",5,0,0"]
     [
     ],
     linearLayout
-    [
-      height $ V 30
-      , id_ "ground1"
-      , width $ V 975
-      , margin $ show ((mod (state.groundSpeed) 975)+975)<>",5,0,0"
-    ]
+    [height $ V 30, id_ "ground1", width $ V 975, margin $ show ((mod (state.groundSpeed) 975)+975)<>",5,0,0"]
     [
     ],
-    textView[
-      width Match_Parent
-    , margin "0,30,0,0"
-    , text "Space To Jump"
-    , gravity "center"
-    , textSize "40"
-    ]
+    textView[width Match_Parent, margin "0,30,0,0", text "Space To Jump", gravity "center", textSize "40"]
     ]
   ]
