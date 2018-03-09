@@ -1,8 +1,9 @@
 module Main where
 
 import Prelude
+
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Random (RANDOM, randomInt, randomRange)
 import DOM (DOM)
 import Data.Array ((..), filter, null)
@@ -15,7 +16,8 @@ import FRP.Behavior.Keyboard (key)
 import FRP.Event.Time (animationFrame)
 import Game.DrawTools (charDraw)
 import Game.Types (Prop, StateType, Player)
-import Game.Values (charCount, groundPos,obstacleDist)
+import Game.Utils (getGroundSpeed, getNewPropLocation, getPlayer, isGameOver, isGameStart, isPlayerGrounded, newScore, scorePosition)
+import Game.Values (charCount, groundPos, obstacleDist)
 import Math (sin, abs)
 import PrestoDOM.Core (PrestoDOM)
 import PrestoDOM.Elements (linearLayout, textView, relativeLayout, imageView)
@@ -23,42 +25,33 @@ import PrestoDOM.Properties (background, id_, color, gravity, margin, height, na
 import PrestoDOM.Types (Length(..))
 import PrestoDOM.Util (render)
 
---update scores
-updateScore::forall t74 t75. t74 -> t75 -> t75
-updateScore keys score=
-
-  score
-
---produce baloon
-getCharItem ::forall a. Int -> Eff(random :: RANDOM | a) Prop
-getCharItem a =
+getPropItem ::forall a. Int -> Eff(random :: RANDOM | a) Prop
+getPropItem a =
   randomRange 0.0 3.0 >>= \n ->
     randomInt 0 3 >>= \m ->
       pure{x:a*obstacleDist,y:groundPos - (m*50),key :a,id:"Prop",aid:n}
 
 collisionOne::Player -> Prop -> Boolean
-collisionOne player prop = if abs((200.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
-                              then true
-                              else false
+collisionOne player prop =  abs((200.0 - 150.0*sin(player.y))-toNumber(prop.y))<40.0 && abs(100.0 - toNumber(prop.x))<40.0
 
 collisionAll::StateType -> Array Prop
 collisionAll state =  filter (collisionOne state.player) state.props
 
 main :: forall eff. Eff ( random::RANDOM, console :: CONSOLE, frp :: FRP, dom :: DOM | eff ) Unit
 main = do
-    _ <- log "Running"
-    setOfChars <- (traverse getCharItem (1 .. charCount))
-    let initialState = {props:setOfChars,player:{y:0.0,aid:0.0}, score:0, scorePos: {x: "30", y:"30"},gameStart:true, gameOver:false, groundSpeed:0}
+    setOfChars <- (traverse getPropItem (1 .. charCount))
+    let initialState = {props:setOfChars,player:{y:0.0,aid:0.0}, score:0, scorePos:scorePosition,gameStart:true, gameOver:false, groundSpeed:0}
     { stateBeh, updateState } <- render view initialState
     _<- updateState
       (validate <$> (key 32) <*> stateBeh)
       (animationFrame)
     pure unit
-  where validate key oldState | oldState.gameOver==true || (oldState.gameStart==true && key==false) = oldState
-        validate key oldState | oldState.gameStart == true && key == true = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09,aid: if oldState.player.aid>2.9 then oldState.player.aid-2.8 else oldState.player.aid+0.1}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
-        validate key oldState | key == true && oldState.player.y>3.14 = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:0.0,aid:0.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
-        validate key oldState | null (collisionAll oldState) == false = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09 , aid:3.0}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:true,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
-        validate key oldState  = { props: (map (\n->if n.x<0 then {x:500*charCount,y:groundPos-50*((n.y+n.key) `mod` 3),id:n.id,key:n.key,aid:n.aid+0.1} else {x:n.x-8-oldState.score / 500,y:n.y,id:n.id,key:n.key,aid:if n.aid>1.9 then n.aid-1.9 else n.aid+0.1}) oldState.props)    ,player:{y:clamp 0.0 3.141 oldState.player.y+0.09,aid: if oldState.player.aid>2.9 then oldState.player.aid-2.8 else oldState.player.aid+0.1}, score:oldState.score+1, scorePos: {x: "30", y:"30"},gameStart:false, gameOver:false,groundSpeed:oldState.groundSpeed-8-oldState.score / 500}
+  where validate key oldState | (isGameOver oldState) || ((isGameStart oldState) && key==false) = oldState
+        validate key oldState | (isGameStart oldState) && key == true = { props : (getNewPropLocation oldState.props oldState.score),player:getPlayer oldState, score:(newScore oldState.score), scorePos:scorePosition,gameStart:false, gameOver:false,groundSpeed:getGroundSpeed oldState.groundSpeed oldState.score }
+        validate key oldState | (isGameStart oldState) && key == true = { props : (getNewPropLocation oldState.props oldState.score),player:getPlayer oldState, score:(newScore oldState.score), scorePos:scorePosition,gameStart:false, gameOver:false,groundSpeed:getGroundSpeed oldState.groundSpeed oldState.score }
+        validate key oldState | key == true && (isPlayerGrounded oldState) = { props: (getNewPropLocation oldState.props oldState.score),player:{y:0.0,aid:0.0}, score:(newScore oldState.score), scorePos:scorePosition,gameStart:false, gameOver:false,groundSpeed:getGroundSpeed oldState.groundSpeed oldState.score}
+        validate key oldState | null (collisionAll oldState) == false = { props:(getNewPropLocation oldState.props oldState.score) ,player:{y:oldState.player.y, aid:3.0}, score:(newScore oldState.score), scorePos:scorePosition,gameStart:false, gameOver:true,groundSpeed:getGroundSpeed oldState.groundSpeed oldState.score}
+        validate key oldState | otherwise = { props: (getNewPropLocation oldState.props oldState.score) ,player:getPlayer oldState, score:(newScore oldState.score), scorePos:scorePosition,gameStart:false, gameOver:false,groundSpeed:getGroundSpeed oldState.groundSpeed oldState.score}
 
 view :: forall w i. StateType -> PrestoDOM i w
 view state =
